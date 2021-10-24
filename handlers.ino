@@ -1,7 +1,7 @@
 void handleRoot() {
-  digitalWrite(LED, 1);
+  digitalWrite(LED, !statusLED);
   server.send(200, "text/plain", "hello from esp32!");
-  digitalWrite(LED, 0);
+  digitalWrite(LED, statusLED);
 }
 #ifdef DISPLAY_ssd1306
 void handleDisplay()
@@ -24,7 +24,7 @@ void handleDisplay()
       if(server.argName(i) == "setCursor")
       {
         display.setCursor(0,0);
-        message += "\nCursor plased a x=0 y=0\n";
+        message += "\nCursor placed a x=0 y=0\n";
       }
       if(server.argName(i) == "clearDisplay")
       {
@@ -47,11 +47,8 @@ void handleInfo()
   message += "Connected to: '" + (String)WiFi.SSID() + "', RSSI: " + (String)WiFi.RSSI() + " dBm\n";
   message += "NiazOS version: " + (String)OSVERSION + "\n";
   message += "Server uptime: " + (String)(millis()/1000) + " seconds\n";
-  //message +=  "Real time: " + (String)daysOfTheWeek[timeClient.getDay()] + 
-  //            ", " + (String)timeClient.getHours() + 
-  //            ":" + (String)timeClient.getMinutes() + 
-  //            ":" + (String)timeClient.getSeconds()+ "\n";
   message += "Real time: " + (String)daysOfTheWeek[timeClient.getDay()] + ", " + (String)timeClient.getFormattedTime() + "\n";
+  message += "About: " +about+"\n";
   server.send(200, "text/plain", message);
 }
 
@@ -117,7 +114,7 @@ void handleWiFi()
 }
 
 void handleNotFound() {
-  digitalWrite(LED, 1);
+  digitalWrite(LED, !statusLED);
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -130,7 +127,7 @@ void handleNotFound() {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  digitalWrite(LED, 0);
+  digitalWrite(LED, statusLED);
 }
 
 void handlers()
@@ -156,6 +153,8 @@ void handlers()
   });
 
   server.on("/info", handleInfo);
+
+  server.on("/pin", handlePins);
   
   #ifdef LAMP_MODE
     server.on("/lamp", handle_lamp);

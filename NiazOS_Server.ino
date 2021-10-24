@@ -10,11 +10,14 @@
 //Включает функции дисплея SSD1306 
 //#define DISPLAY_ssd1306
 
-#define OSVERSION 0.1
+#define OSVERSION 0.2
+
+String about = "Multi microcontroller";
+//about = "Lamp button. Control light in the room";
+//String about = "Lamp. Can't control lamp. Because Scheme don't work";
 
 
-
-const char* ssid = "ssid";
+const char* ssid = "login";
 const char* password = "pass";
 
 const int httpsPort = 443;  //Адрес порта для HTTPS= 443 или HTTP = 80
@@ -24,6 +27,8 @@ const char fingerprint[] PROGMEM = "5B:FB:D1:D4:49:D3:0F:A9:C6:40:03:34:BA:E0:24
 /*
  * ------------END-------------
  */
+#define btninput 14 
+#define rele 13
 
 
 
@@ -73,18 +78,11 @@ const char fingerprint[] PROGMEM = "5B:FB:D1:D4:49:D3:0F:A9:C6:40:03:34:BA:E0:24
   Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 #endif
 
-
-
-const long utcOffsetInSeconds = 10800;  //UTC +3 = 3 * 60 * 60
-
 char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 // Определение NTP-клиента для получения времени
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org", utcOffsetInSeconds);
-
-
-boolean __connected = false;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 10800);  //UTC +3 = 3 * 60 * 60
 
 #ifdef ESP8266
   ESP8266HTTPUpdateServer httpUpdater;
@@ -95,11 +93,14 @@ IPAddress ip;
 void setup(void)
 {
   pinMode(LED, OUTPUT);
-  digitalWrite(LED, 0);
+  digitalWrite(LED, statusLED);
   Serial.begin(115200);
-  pinMode(13, OUTPUT);
-  digitalWrite(13, LOW);
+  //pinMode(13, OUTPUT);
+  //digitalWrite(13, LOW);
 
+  pinMode(btninput, INPUT);
+  pinMode(rele, OUTPUT);
+  digitalWrite(rele, 1);
   
   #ifdef DISPLAY_ssd1306
     if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
@@ -141,7 +142,6 @@ void setup(void)
     Serial.println(ssid);
     //если подключились к сети, то запустим NTPClient 
     timeClient.begin();
-    __connected = true;
   }
   Serial.print("IP address: ");
   Serial.println(ip);
@@ -190,12 +190,12 @@ void setup(void)
 
 
 
-
 int timer = millis();
 int previousMillis_wifi = millis();
 uint8_t _t = 0;
 void loop(void)
 {
+  handleButton();
   if (WiFi.status() == WL_CONNECTED)
   {
       if(_t)
@@ -210,13 +210,10 @@ void loop(void)
       #ifdef LAMP_MODE
         lamp();
       #endif
-      if(__connected)
+      if(millis() - timer > 1000)
       {
-          if(millis() - timer > 1000)
-          {
-            timeClient.update();
-            timer = millis();
-          }
+        timeClient.update();
+        timer = millis();
       }
   }
   else
