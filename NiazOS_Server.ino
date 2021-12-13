@@ -7,18 +7,37 @@
 //Включит в компоненты компиляции Модуль лампы
 //#define LAMP_MODE
 
+//подключает управление кнопкой на пинах
+//#define _Button
+
+//включает режим дебаг(выставляет нужные значения для голого МК)
+//#define DEBUG_MODE
+
+//Включает телеграмм в компиляцию
+//#define TELEGRAM
+
 //Включает функции дисплея SSD1306 
 //#define DISPLAY_ssd1306
 
-#define OSVERSION 0.2
+#define OSVERSION 0.41
 
-String about = "Multi microcontroller";
-//about = "Lamp button. Control light in the room";
+//String about = "Multi microcontroller";
+String about = "Lamp button. Control light in the room";
 //String about = "Lamp. Can't control lamp. Because Scheme don't work";
 
 
-const char* ssid = "login";
-const char* password = "pass";
+const char* ssid = "Home";
+const char* password = "34ValI45";
+
+const int UTC = 3; //UTC +3, Moscow
+
+#ifdef ESP32
+  const char* hostssid = "esp32";
+#endif
+#ifdef ESP8266
+  const char* hostssid = "esp8266";
+#endif
+const char* hostpassword = "12345678";
 
 const int httpsPort = 443;  //Адрес порта для HTTPS= 443 или HTTP = 80
 const char fingerprint[] PROGMEM = "5B:FB:D1:D4:49:D3:0F:A9:C6:40:03:34:BA:E0:24:05:AA:D2:E2:01"; //ключ для шифрования
@@ -27,9 +46,19 @@ const char fingerprint[] PROGMEM = "5B:FB:D1:D4:49:D3:0F:A9:C6:40:03:34:BA:E0:24
 /*
  * ------------END-------------
  */
-#define btninput 14 
-#define rele 13
 
+#ifndef DEBUG_MODE
+# define RELEASE_MODE
+# define btninput 14 
+# define rele 13
+#endif
+
+//aka debug mode
+#ifdef DEBUG_MODE
+# define Blink      //Включаем Blink
+# define btninput 5
+# define rele 4
+#endif
 
 
 
@@ -82,7 +111,7 @@ char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursd
 
 // Определение NTP-клиента для получения времени
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org", 10800);  //UTC +3 = 3 * 60 * 60
+NTPClient timeClient(ntpUDP, "pool.ntp.org", UTC * 60 * 60);  //UTC +3 = 3 * 60 * 60
 
 #ifdef ESP8266
   ESP8266HTTPUpdateServer httpUpdater;
@@ -105,7 +134,6 @@ void setup(void)
   #ifdef DISPLAY_ssd1306
     if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
       Serial.println(F("SSD1306 allocation failed"));
-      for(;;); // Don't proceed, loop forever
     }
     display.clearDisplay();
     display.setTextSize(1);             
@@ -123,12 +151,15 @@ void setup(void)
   {
     delay(500);
     Serial.print(".");
+    #ifdef _Button
+      handleButton();
+    #endif
     c++;
     if(c > 20)
     {
-      WiFi.softAP("esp32", "12345678");
+      WiFi.softAP(hostssid, hostpassword);
       ip = WiFi.softAPIP();
-      Serial.println("\nTimeout. Created new AP. esp32");
+      Serial.println("\nTimeout. Created new AP. "+(String)hostssid);
       break;
     }
   }
@@ -147,7 +178,7 @@ void setup(void)
   Serial.println(ip);
 
 
-  if (MDNS.begin("esp32")) {
+  if (MDNS.begin(hostssid)) {
     Serial.println("MDNS responder started");
   }
   #ifdef DISPLAY_ssd1306
@@ -160,7 +191,7 @@ void setup(void)
     }
     else
     {
-      display.print("AP: esp32\npaswd: 12345678\n");
+      display.print("AP: "+(String)hostssid+"\npaswd: "+(String)hostpassword+"\n");
     }
     display.print("IP:");
     display.println(ip);
@@ -168,7 +199,9 @@ void setup(void)
   #endif
   handlers();
   server.begin();
-  
+  #ifdef TELEGRAM
+    tg_init();
+  #endif
   digitalWrite(LED, statusLED);
   Serial.println("HTTP server started");
 
@@ -195,7 +228,9 @@ int previousMillis_wifi = millis();
 uint8_t _t = 0;
 void loop(void)
 {
-  handleButton();
+  #ifdef _Button
+    handleButton();
+  #endif
   if (WiFi.status() == WL_CONNECTED)
   {
       if(_t)
@@ -204,6 +239,9 @@ void loop(void)
       int c = 0;
       server.handleClient();
       ArduinoOTA.handle();
+      #ifdef TELEGRAM
+        tg_handler();
+      #endif
       #ifdef DISPLAY_ssd1306
         display.display();
       #endif 
@@ -228,9 +266,9 @@ void loop(void)
     }
     if (_t > 5)
     {
-      WiFi.softAP("esp32", "12345678");
+      WiFi.softAP(hostssid, hostpassword);
       ip = WiFi.softAPIP();
-      Serial.println("\nTimeout. Created new AP. esp32");
+      Serial.println("\nTimeout. Created new AP. " + (String)hostssid);
       _t = 0;
     }
   }

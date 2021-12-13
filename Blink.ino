@@ -1,5 +1,5 @@
 
-
+#ifdef Blink
 const String HtmlHtml = "<html><head><meta charset=\"utf-8\">"
 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" /></head>";
 const String HtmlTitle = "<h1>Мигаем системным светодиодом из созданной точки доступа</h1><br/>\n";
@@ -35,3 +35,4 @@ void response(){
   htmlRes += HtmlHtmlClose; 
   server.send(200, "text/html", htmlRes);
 }
+#endif

@@ -40,6 +40,9 @@ void handleDisplay()
 void handleInfo()
 {
   String message = "Info about this microcontroller: \n\n";
+  #ifdef DEBUG
+    message += "Debug enable. Please upload a release mode(Debug mode have a some bugs\n";
+  #endif
   message += "Mac address: " + (String)WiFi.macAddress() + "\n";
   message += "IP address: ";
   message += WiFi.localIP().toString();
@@ -49,8 +52,24 @@ void handleInfo()
   message += "Server uptime: " + (String)(millis()/1000) + " seconds\n";
   message += "Real time: " + (String)daysOfTheWeek[timeClient.getDay()] + ", " + (String)timeClient.getFormattedTime() + "\n";
   message += "About: " +about+"\n";
+  message += "MK at board: ";
+  #ifdef ESP32
+    message += "ESP32\n";
+  #endif
+  #ifdef ESP8266
+    message += "ESP8266\n";
+  #endif
+  message += "fingerprint: " + (String)fingerprint + "\n";
   server.send(200, "text/plain", message);
 }
+
+#ifdef ESP32
+void handleBluetooth()
+{
+  String message = "Function is anavable\nmicrocontroller not enough memory to import created by someone a dev-ops. Need to write his manualy.";
+  server.send(404, "text/plain", message);
+}
+#endif
 
 void handleWiFi()
 {
@@ -138,24 +157,30 @@ void handlers()
     server.on("/display", handleDisplay);
   #endif
   
-  server.on("/inline", []() {
-    server.send(200, "text/plain", "this works as well");
-  });
-
-  server.on("/LED", response);
-  server.on("/LEDOn", handleLedOn);
-  server.on("/LEDOff", handleLedOff); 
-
+  #ifdef DEBUG_MODE
+    server.on("/inline", []() {
+      server.send(200, "text/plain", "this works as well");
+    });
+  #endif
+  #ifdef Blink
+    server.on("/LED", response);
+    server.on("/LEDOn", handleLedOn);
+    server.on("/LEDOff", handleLedOff); 
+  #endif
   server.on("/wifi", handleWiFi);
+  
+  #ifdef ESP32
+    server.on("/bluetooth", handleBluetooth);
+  #endif
   
   server.on("/restart", []() {
     ESP.restart();
   });
 
   server.on("/info", handleInfo);
-
-  server.on("/pin", handlePins);
-  
+  #ifdef _Button
+    server.on("/pin", handlePins);
+  #endif
   #ifdef LAMP_MODE
     server.on("/lamp", handle_lamp);
   #endif
