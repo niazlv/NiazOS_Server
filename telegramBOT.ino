@@ -1,7 +1,7 @@
 #ifdef TELEGRAM
 #include <UniversalTelegramBot.h>
 
-String BOT_TOKEN = "2060543701:AAEwVITh4xmBIDjQruk1f0oqJyVmlV18zCw";
+String BOT_TOKEN = "xxxxxxxxxx:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
 
 X509List cert(TELEGRAM_CERTIFICATE_ROOT);
 WiFiClientSecure secured_client;
