@@ -6,7 +6,7 @@
 //#define LAMP_MODE
 
 //подключает управление кнопкой на пинах
-//#define _Button
+#define _Button
 
 //включает режим дебаг(выставляет нужные значения для голого МК)
 //#define DEBUG_MODE

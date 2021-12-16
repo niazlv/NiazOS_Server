@@ -78,20 +78,53 @@ void handleInfo()
   #endif
   message += "CPU Freq: " + (String)ESP.getCpuFreqMHz() + (String)" MHz\n";
   message += "ESP CPU cycle count: " + (String)ESP.getCycleCount() + (String)"\n";
-  message += "ESP Chip ID: " + (String)ESP.getChipId() + (String)"\n";
-  message += "Core Version: " + (String)ESP.getCoreVersion() + (String)"\n";
+  message += "ESP Chip Model: ";
+  #ifdef ESP8266
+    message += "\n";
+    message += "ESP Chip ID: " + (String)ESP.getChipId() + (String)"\n";
+    message += "Core Version: " + (String)ESP.getCoreVersion() + (String)"\n";
+  #endif
+  #ifdef ESP32
+    message += (String)ESP.getChipModel() + (String)"\n";
+    message += "ESP Chip ID: " + (String)((uint32_t)ESP.getEfuseMac()) + (String)"\n";
+    message += "Core count: " + (String)ESP.getChipCores() + (String)"\n";
+  #endif
   message += "SDK Version: " + (String)ESP.getSdkVersion() + (String)"\n";
   message += "MD5 sign a OS: " + (String)ESP.getSketchMD5() + (String)"\n";
   message += "Flash size(visible via SDK): " + (String)(ESP.getFlashChipSize()/1024) + (String)" KiB\n";
-  message += "Flash size(shoud be based on Chip ID): " + (String)(ESP.getFlashChipRealSize()/1024) + (String)" KiB\n";
+  message += "Flash size(shoud be based on Chip ID): ";
+  #ifdef ESP8266
+    message += (String)(ESP.getFlashChipRealSize()/1024) + (String)" KiB\n";
+  #endif
+  #ifdef ESP32
+    message += "\n";
+  #endif
   message += "Flash Freq: " + (String)(ESP.getFlashChipSpeed()/1000000) + (String)"MHz\n";
-  message += "Flash ID: " + (String)ESP.getFlashChipId() + (String)"\n";
+  message += "Flash ID: ";
+  #ifdef ESP8266
+    message += (String)ESP.getFlashChipId() + (String)"\n";
+  #endif
+  #ifdef ESP32
+    message += "\n";
+  #endif
   message += "Size of Sketch: " + (String)(ESP.getSketchSize()/1024) + "/" + (String)(ESP.getFlashChipSize()/1024) + (String)" KiB\n";
   message += "Free memory: " +  (String)(ESP.getFreeSketchSpace()/1024) + "/" + (String)(ESP.getFlashChipSize()/1024) + (String)" KiB\n";
   message += "Free HEAP: " + (String)ESP.getFreeHeap() + (String)"\n";
-  message += "Heap fragmentation: " + (String)ESP.getHeapFragmentation() + (String)"%\n";
-  message += "CRC: " + (String)((ESP.checkFlashCRC()) ? "true":"false") + (String)"\n";
-
+  message += "Heap fragmentation: ";
+  #ifdef ESP8266
+    message += (String)ESP.getHeapFragmentation() + (String)"%\n";
+  #endif
+  #ifdef ESP32
+    message += "\n";
+  #endif
+  message += "CRC: ";
+  #ifdef ESP8266
+    message += (String)((ESP.checkFlashCRC()) ? "true":"false") + (String)"\n";
+  #endif
+  #ifdef ESP32
+    message += "\n";
+  #endif
+  
   server.send(200, "text/plain", message);
 }
 
