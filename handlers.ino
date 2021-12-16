@@ -1,6 +1,15 @@
 void handleRoot() {
   digitalWrite(LED, !statusLED);
-  server.send(200, "text/plain", "hello from esp32!");
+  String message = "hello from ";
+  #ifdef ESP32
+    message += "ESP32\n";
+  #endif
+  #ifdef ESP8266
+    message += "ESP8266\n";
+  #endif
+  message += "\nThis port/address is needed to control one of the modules of the smart home system. If you are not familiar with it or have not been "
+  "Direct instructions from the chief administrator, then I suggest you leave the page.";
+  server.send(200, "text/plain", message);
   digitalWrite(LED, statusLED);
 }
 #ifdef DISPLAY_ssd1306
@@ -52,6 +61,11 @@ void handleInfo()
   message += "Server uptime: " + (String)(millis()/1000) + " seconds\n";
   message += "Real time: " + (String)daysOfTheWeek[timeClient.getDay()] + ", " + (String)timeClient.getFormattedTime() + "\n";
   message += "About: " +about+"\n";
+
+
+  
+  message += "\n\nInfo for devolopers:\n\n";
+  message += "Fingerprint: " + (String)fingerprint + (String)"\n";
   message += "MK at board: ";
   #ifdef ESP32
     message += "ESP32\n";
@@ -59,7 +73,25 @@ void handleInfo()
   #ifdef ESP8266
     message += "ESP8266\n";
   #endif
-  message += "fingerprint: " + (String)fingerprint + "\n";
+  #if !defined ESP32 && !defined ESP8266
+    message += "none\n"
+  #endif
+  message += "CPU Freq: " + (String)ESP.getCpuFreqMHz() + (String)" MHz\n";
+  message += "ESP CPU cycle count: " + (String)ESP.getCycleCount() + (String)"\n";
+  message += "ESP Chip ID: " + (String)ESP.getChipId() + (String)"\n";
+  message += "Core Version: " + (String)ESP.getCoreVersion() + (String)"\n";
+  message += "SDK Version: " + (String)ESP.getSdkVersion() + (String)"\n";
+  message += "MD5 sign a OS: " + (String)ESP.getSketchMD5() + (String)"\n";
+  message += "Flash size(visible via SDK): " + (String)(ESP.getFlashChipSize()/1024) + (String)" KiB\n";
+  message += "Flash size(shoud be based on Chip ID): " + (String)(ESP.getFlashChipRealSize()/1024) + (String)" KiB\n";
+  message += "Flash Freq: " + (String)(ESP.getFlashChipSpeed()/1000000) + (String)"MHz\n";
+  message += "Flash ID: " + (String)ESP.getFlashChipId() + (String)"\n";
+  message += "Size of Sketch: " + (String)(ESP.getSketchSize()/1024) + "/" + (String)(ESP.getFlashChipSize()/1024) + (String)" KiB\n";
+  message += "Free memory: " +  (String)(ESP.getFreeSketchSpace()/1024) + "/" + (String)(ESP.getFlashChipSize()/1024) + (String)" KiB\n";
+  message += "Free HEAP: " + (String)ESP.getFreeHeap() + (String)"\n";
+  message += "Heap fragmentation: " + (String)ESP.getHeapFragmentation() + (String)"%\n";
+  message += "CRC: " + (String)((ESP.checkFlashCRC()) ? "true":"false") + (String)"\n";
+
   server.send(200, "text/plain", message);
 }
 

@@ -1,10 +1,8 @@
 #include "NiazOS.h"
-
 /*
- * ----------Settings----------
+ * ------------------------SETTINGS-------------------------
  */
-
-//Включит в компоненты компиляции Модуль лампы
+ //Включит в компоненты компиляции Модуль лампы
 //#define LAMP_MODE
 
 //подключает управление кнопкой на пинах
@@ -19,33 +17,27 @@
 //Включает функции дисплея SSD1306 
 //#define DISPLAY_ssd1306
 
-#define OSVERSION 0.41
+#define OSVERSION 0.42
 
-//String about = "Multi microcontroller";
-String about = "Lamp button. Control light in the room";
-//String about = "Lamp. Can't control lamp. Because Scheme don't work";
-
-
-const char* ssid = "Home";
-const char* password = "34ValI45";
-
-const int UTC = 3; //UTC +3, Moscow
-
-#ifdef ESP32
-  const char* hostssid = "esp32";
+#if !defined LAMP_MODE && !defined _Button
+  String about = "Multi microcontroller";
 #endif
-#ifdef ESP8266
-  const char* hostssid = "esp8266";
+#if defined _Button && !defined LAMP_MODE
+  String about = "Lamp button. Control light in the room";
 #endif
-const char* hostpassword = "12345678";
+#if defined LAMP_MODE && !defined _Button
+  String about = "Lamp. Can't control lamp. Because Scheme don't work";
+#endif
+
+
 
 const int httpsPort = 443;  //Адрес порта для HTTPS= 443 или HTTP = 80
 const char fingerprint[] PROGMEM = "5B:FB:D1:D4:49:D3:0F:A9:C6:40:03:34:BA:E0:24:05:AA:D2:E2:01"; //ключ для шифрования
 
-
 /*
- * ------------END-------------
+ * -------------------------------------------------------------
  */
+
 
 #ifndef DEBUG_MODE
 # define RELEASE_MODE
@@ -60,35 +52,19 @@ const char fingerprint[] PROGMEM = "5B:FB:D1:D4:49:D3:0F:A9:C6:40:03:34:BA:E0:24
 # define rele 4
 #endif
 
+const char* ssid = "Home";
+const char* password = "34ValI45";
 
+const int UTC = 3; //UTC +3, Moscow
 
-//Если плата ESP32
-#ifdef HAL_ESP32_HAL_H_
-  #define ESP32
-  #include <WiFi.h>
-  #include <WiFiClient.h>
-  #include <WebServer.h>
-  #include <ESPmDNS.h>
-  
-  WebServer server(80);
-  #define LED 13
-  int statusLED = LOW; // Начальный статус светодиода ВЫКЛЮЧЕН
+#ifdef ESP32
+  const char* hostssid = "esp32";
 #endif
-
-//Если плата ESP8266
-#ifdef __CORE_ESP8266_VERSION_H
-  #define ESP8266
-  #include <ESP8266WiFi.h>
-  #include <WiFiClient.h>
-  #include <WiFiClientSecure.h>
-  #include <ESP8266WebServer.h>
-  #include <ESP8266mDNS.h>
-  #include <ESP8266HTTPUpdateServer.h>
-
-  ESP8266WebServer server(80);
-  #define LED 2
-  int statusLED = HIGH; // Начальный статус светодиода ВЫКЛЮЧЕН
+#ifdef ESP8266
+  const char* hostssid = "esp8266";
 #endif
+const char* hostpassword = "12345678";
+
 
 
 
@@ -127,6 +103,8 @@ void setup(void)
   //pinMode(13, OUTPUT);
   //digitalWrite(13, LOW);
 
+  //LittleFS.begin();
+  
   pinMode(btninput, INPUT);
   pinMode(rele, OUTPUT);
   digitalWrite(rele, 1);

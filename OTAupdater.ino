@@ -1,3 +1,8 @@
+/*
+ * https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/generic-class.html
+ * Статья про многоканальный режим работы(для esp8266)
+ */
+
 #ifdef ESP32
 const char* serverIndex =
 "<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>"
@@ -38,6 +43,9 @@ const char* serverIndex =
 #endif
 void __OTA_init__()
 {
+  
+  //LittleFS.end();
+  
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
   });
@@ -60,6 +68,9 @@ void __OTA_init__()
 #ifdef ESP32
 void webOTA_ESP32()
 {
+
+  //LittleFS.end();
+  
   //UPDATE VIA OTA WEB INTERFASE
   server.on("/update", HTTP_GET, []() {
     server.sendHeader("Connection", "close");
