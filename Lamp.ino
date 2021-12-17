@@ -14,18 +14,18 @@
 #define _50HZ_pin 14
 #define duty_pin 12
 
-int timer = millis();
+int timerLamp = millis();
 bool t = true;
 bool lamp_status = false;
 
 
 void lamp()
 {
-  /*if (millis() - timer >=20)
+  /*if (millis() - timerLamp >=20)
   {
     t = !t;
     digitalWrite(_50HZ_pin, t);
-    timer = millis();
+    timerLamp = millis();
   }
   digitalWrite(duty_pin, HIGH);
   */

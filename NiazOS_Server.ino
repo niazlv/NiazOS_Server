@@ -3,10 +3,10 @@
  * ------------------------SETTINGS-------------------------
  */
  //Включит в компоненты компиляции Модуль лампы
-//#define LAMP_MODE
+#define LAMP_MODE
 
 //подключает управление кнопкой на пинах
-#define _Button
+//#define _Button
 
 //включает режим дебаг(выставляет нужные значения для голого МК)
 //#define DEBUG_MODE
@@ -64,7 +64,7 @@ const int UTC = 3; //UTC +3, Moscow
   const char* hostssid = "esp8266";
 #endif
 const char* hostpassword = "12345678";
-
+ 
 
 
 
@@ -206,6 +206,7 @@ int previousMillis_wifi = millis();
 uint8_t _t = 0;
 void loop(void)
 {
+  watchdogs();
   #ifdef _Button
     handleButton();
   #endif

@@ -1,6 +1,6 @@
 #ifdef _Button
 uint8_t buttonpos = 0;
-int t = millis();
+unsigned long t = millis();
 int blockTime = 0;
 void handleButton()
 {
