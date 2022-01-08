@@ -6,7 +6,25 @@ void check_uptime()
     ESP.restart();
 }
 
+//отключает блокировку кнопки, если нет интернета
+void unblock_button_if_dnc()
+{
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    #ifdef _Button
+      blockTime = 0;
+    #endif
+  }
+}
+
+void get_time()
+{
+  stamp.getDateTime(timeClient.getEpochTime());
+}
+
 void watchdogs()
 {
   check_uptime();
+  unblock_button_if_dnc();
+  get_time();
 }

@@ -59,7 +59,8 @@ void handleInfo()
   message += "Connected to: '" + (String)WiFi.SSID() + "', RSSI: " + (String)WiFi.RSSI() + " dBm\n";
   message += "NiazOS version: " + (String)OSVERSION + "\n";
   message += "Server uptime: " + (String)(millis()/1000) + " seconds\n";
-  message += "Real time: " + (String)daysOfTheWeek[timeClient.getDay()] + ", " + (String)timeClient.getFormattedTime() + "\n";
+  message += "Real time: " + (String)daysOfTheWeek[timeClient.getDay()] + ", " + (String)timeClient.getFormattedTime() + "\n";  //
+  message += "Date: " + (String)stamp.day + "." + (String)stamp.month + "." + (String)stamp.year + " " + (String)stamp.hour + ":" + (String)stamp.minute + ":" + (String)stamp.second + "\n";
   message += "About: " +about+"\n";
 
 
@@ -124,6 +125,7 @@ void handleInfo()
   #ifdef ESP32
     message += "\n";
   #endif
+  message += "UNIX time: " + (String)timeClient.getEpochTime() + "\n"; 
   
   server.send(200, "text/plain", message);
 }
@@ -131,7 +133,7 @@ void handleInfo()
 #ifdef ESP32
 void handleBluetooth()
 {
-  String message = "Function is anavable\nmicrocontroller not enough memory to import created by someone a dev-ops. Need to write his manualy.";
+  String message PROGMEM = "Function is anavable\nmicrocontroller not enough memory to import created by someone a dev-ops. Need to write his manualy.";
   server.send(404, "text/plain", message);
 }
 #endif

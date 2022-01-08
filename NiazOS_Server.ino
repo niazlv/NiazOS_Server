@@ -52,7 +52,7 @@ const char fingerprint[] PROGMEM = "5B:FB:D1:D4:49:D3:0F:A9:C6:40:03:34:BA:E0:24
 # define rele 4
 #endif
 
-const char* ssid = "Home";
+const char* ssid= "Home";
 const char* password = "34ValI45";
 
 const int UTC = 3; //UTC +3, Moscow
@@ -75,20 +75,22 @@ const char* hostpassword = "12345678";
   //#include <SoftwareWire.h>
   #include <Adafruit_GFX.h>
   #include <Adafruit_SSD1306.h>
-  #define SCREEN_WIDTH 128 // OLED display width, in pixels
-  #define SCREEN_HEIGHT 64 // OLED display height, in pixels
+  #define SCREEN_WIDTH 128
+  #define SCREEN_HEIGHT 64 
   uint8_t sda=12,scl=14;
   
-  #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+  #define SCREEN_ADDRESS 0x3C 
   Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 #endif
 
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+char daysOfTheWeek[7][12] PROGMEM = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 // Определение NTP-клиента для получения времени
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", UTC * 60 * 60);  //UTC +3 = 3 * 60 * 60
 
+
+UnixTime stamp(0);    //timeClient и так уже добавил UTC 
 #ifdef ESP8266
   ESP8266HTTPUpdateServer httpUpdater;
 #endif
@@ -104,6 +106,7 @@ void setup(void)
   //digitalWrite(13, LOW);
 
   //LittleFS.begin();
+  WiFi.mode(WIFI_AP_STA);
   
   pinMode(btninput, INPUT);
   pinMode(rele, OUTPUT);
@@ -195,6 +198,9 @@ void setup(void)
   __OTA_init__();
   ArduinoOTA.begin();
   Serial.println("OTA started");
+  WiFi.softAP(hostssid, hostpassword,1,true,8);
+  Serial.print("Wifi started(AP) ip:");
+  Serial.println(WiFi.softAPIP());
 }
 
 
@@ -210,6 +216,8 @@ void loop(void)
   #ifdef _Button
     handleButton();
   #endif
+  
+  
   if (WiFi.status() == WL_CONNECTED)
   {
       if(_t)

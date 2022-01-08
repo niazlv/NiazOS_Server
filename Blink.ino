@@ -1,14 +1,14 @@
 
 #ifdef Blink
-const String HtmlHtml = "<html><head><meta charset=\"utf-8\">"
+const String HtmlHtml PROGMEM = "<html><head><meta charset=\"utf-8\">"
 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" /></head>";
-const String HtmlTitle = "<h1>Мигаем системным светодиодом из созданной точки доступа</h1><br/>\n";
-const String HtmlLedStateHigh = "<big>Светодиод <b>Включен</b></big><br/><br/>\n";
-const String HtmlLedStateLow = "<big>Светодиод <b>Выключен</b></big><br/><br/>\n";
-const String HtmlButtons = 
+const String HtmlTitle PROGMEM = "<h1>Мигаем системным светодиодом из созданной точки доступа</h1><br/>\n";
+const String HtmlLedStateHigh PROGMEM = "<big>Светодиод <b>Включен</b></big><br/><br/>\n";
+const String HtmlLedStateLow PROGMEM = "<big>Светодиод <b>Выключен</b></big><br/><br/>\n";
+const String HtmlButtons PROGMEM = 
 "<a href=\"LEDOff\"><button style=\"background-color:red;color:white;width:20%;height:5%;\">Выключить </button></a>\n"
 "<a href=\"LEDOn\"><button style=\"background-color:green;color:white;width:20%;height:5%;\">Включить </button></a><br/>";
-const String HtmlHtmlClose = "</html>";
+const String HtmlHtmlClose PROGMEM = "</html>";
 
 void handleLedOn() {
   statusLED = HIGH; // conditions to make the LED turn on
