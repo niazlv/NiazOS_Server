@@ -26,5 +26,5 @@ void watchdogs()
 {
   check_uptime();
   unblock_button_if_dnc();
-  get_time();
+  //get_time();
 }

@@ -52,8 +52,8 @@ const char fingerprint[] PROGMEM = "5B:FB:D1:D4:49:D3:0F:A9:C6:40:03:34:BA:E0:24
 # define rele 4
 #endif
 
-const char* ssid= "Home";
-const char* password = "34ValI45";
+char ssid[32] = "Home";
+char password[32] = "34ValI45";
 
 const int UTC = 3; //UTC +3, Moscow
 
@@ -97,6 +97,23 @@ UnixTime stamp(0);    //timeClient и так уже добавил UTC
 
 IPAddress ip;
 
+//даёт псевдо уникальное число строки
+int ft_len(char *str)
+{
+  int i = 0,c = 0,d = 0;
+  while(*(str+i) != 0)
+    i++;
+  c = i;
+  for(i = 0; i < c;i++)
+  {
+    d += *(str+i) % 2;
+    d += *(str+i) % 16;
+    d += *(str+i) % 64;
+  }
+  d += c;
+  return (d);
+}
+
 void setup(void)
 {
   pinMode(LED, OUTPUT);
@@ -106,7 +123,24 @@ void setup(void)
   //digitalWrite(13, LOW);
 
   //LittleFS.begin();
-  WiFi.mode(WIFI_AP_STA);
+
+  EEPROM.begin(128);    //выделим память под EEPROM 
+  int t;
+  int start_addr = 10;
+  int uniid = ft_len(ssid)+ft_len(password);
+  EEPROM.get(start_addr - 4, t);
+  if(t != uniid)
+  {
+    EEPROM.put(start_addr, ssid);
+    EEPROM.put(sizeof(ssid) + start_addr, password);
+    EEPROM.put(start_addr - 4, uniid);
+    EEPROM.commit();
+  }
+  else
+  {
+    EEPROM.get(start_addr, ssid);
+    EEPROM.get(sizeof(ssid) + start_addr, password);
+  }
   
   pinMode(btninput, INPUT);
   pinMode(rele, OUTPUT);
@@ -199,8 +233,9 @@ void setup(void)
   ArduinoOTA.begin();
   Serial.println("OTA started");
   WiFi.softAP(hostssid, hostpassword,1,true,8);
-  Serial.print("Wifi started(AP) ip:");
+  Serial.print("AP: "+(String)hostssid+"\npaswd: "+(String)hostpassword+"\n"+"\nip: ");
   Serial.println(WiFi.softAPIP());
+  
 }
 
 

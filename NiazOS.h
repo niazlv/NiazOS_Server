@@ -4,12 +4,14 @@
 //Для загрузки прошивки по воздуху
 # include <WiFiUdp.h>
 # include <ArduinoOTA.h>
-# include "NTPClient.h"
+
+# include <EEPROM.h>
 
 //# include "LittleFS.h" // LittleFS is declared
 
 //Для работы со временем(внутренняя библиотека)
 # include "UnixTime.h"
+# include "NTPClient.h"
 
 //Если плата ESP32
 #ifdef HAL_ESP32_HAL_H_

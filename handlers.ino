@@ -59,7 +59,8 @@ void handleInfo()
   message += "Connected to: '" + (String)WiFi.SSID() + "', RSSI: " + (String)WiFi.RSSI() + " dBm\n";
   message += "NiazOS version: " + (String)OSVERSION + "\n";
   message += "Server uptime: " + (String)(millis()/1000) + " seconds\n";
-  message += "Real time: " + (String)daysOfTheWeek[timeClient.getDay()] + ", " + (String)timeClient.getFormattedTime() + "\n";  //
+  message += "Real time: " + (String)daysOfTheWeek[timeClient.getDay()] + ", " + (String)timeClient.getFormattedTime() + "\n";
+  get_time(); //stamp config
   message += "Date: " + (String)stamp.day + "." + (String)stamp.month + "." + (String)stamp.year + " " + (String)stamp.hour + ":" + (String)stamp.minute + ":" + (String)stamp.second + "\n";
   message += "About: " +about+"\n";
 
