@@ -12,7 +12,6 @@
 void app_main(void)
 {
     static httpd_handle_t server = NULL;
-	printf("Hello world!");
     //Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
@@ -35,15 +34,6 @@ void app_main(void)
              },
          },
      };
-
-
-    /*
-    wifi_config.sta.ssid = (unsigned char *)"Home";//(uint8_t *)EXAMPLE_ESP_WIFI_SSID;
-    wifi_config.sta.password = (unsigned char *)"34ValI45";//(uint8_t *)EXAMPLE_ESP_WIFI_PASS;
-    wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
-    wifi_config.sta.pmf_cfg.capable = true;
-    wifi_config.sta.pmf_cfg.required = false;
-	*/
     //if NVS init, then call wifi connect
     if (NiazOS_wifi_init_sta(&wifi_config))
         printf("wifi do not be connected.");
