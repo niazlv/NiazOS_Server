@@ -1,12 +1,13 @@
 #include "NiazOS.h"
+//#include <Ticker.h>
 /*
  * ------------------------SETTINGS-------------------------
  */
 //Включит в компоненты компиляции Модуль лампы
-//#define LAMP_MODE
+#define LAMP_MODE
 
 //подключает управление кнопкой на пинах
-#define _Button
+//#define _Button
 
 //включает режим дебаг(выставляет нужные значения для голого МК)
 //#define DEBUG_MODE
@@ -17,7 +18,7 @@
 //Включает функции дисплея SSD1306 
 //#define DISPLAY_ssd1306
 
-#define OSVERSION 0.42
+#define OSVERSION 0.62
 
 #if !defined LAMP_MODE && !defined _Button
   String about = "Multi microcontroller";
@@ -26,7 +27,7 @@
   String about = "Lamp button. Control light in the room";
 #endif
 #if defined LAMP_MODE && !defined _Button
-  String about = "Lamp. Can't control lamp. Because Scheme don't work";
+  String about = "Lamp controller.";
 #endif
 
 
@@ -41,15 +42,19 @@ const char fingerprint[] PROGMEM = "5B:FB:D1:D4:49:D3:0F:A9:C6:40:03:34:BA:E0:24
 
 #ifndef DEBUG_MODE
 # define RELEASE_MODE
-# define btninput 14 
-# define rele 13
+# ifdef _Button
+  # define btninput 14 
+  # define rele 13
+# endif
 #endif
 
 //aka debug mode
 #ifdef DEBUG_MODE
 # define Blink      //Включаем Blink
-# define btninput 5
-# define rele 4
+# ifdef _Button
+  # define btninput 5
+  # define rele 4
+# endif
 #endif
 
 char ssid[32] = "Home";
@@ -97,6 +102,8 @@ UnixTime stamp(0);    //timeClient и так уже добавил UTC
 
 IPAddress ip;
 
+//Ticker timerz;
+
 //даёт псевдо уникальное число строки
 int ft_len(char *str)
 {
@@ -116,14 +123,64 @@ int ft_len(char *str)
 
 void setup(void)
 {
-  pinMode(LED, OUTPUT);
-  digitalWrite(LED, statusLED);
+  //timerz.attach(0.125,lamp);
   Serial.begin(115200);
-  //pinMode(13, OUTPUT);
-  //digitalWrite(13, LOW);
-
-  //LittleFS.begin();
-
+  //LittleFS.format();
+  #ifdef _on_LittleFS
+  LittleFS.begin();
+  
+  LittleFS.setTimeCallback(get_unix);
+  //небезопасная работа с файлом. Читаем конфиг.
+  if (!LittleFS.exists("/config.txt"))
+  {
+    Serial.println("/config.txt don't exist. Create file...");
+    File file = LittleFS.open("/config.txt", "w");
+    file.println("SSID: " + (String)ssid);
+    file.println("password: " + (String)password);
+    file.close();
+  }
+  else
+  {
+    Serial.println("/config.txt is exist");
+    File file = LittleFS.open("/config.txt", "r");
+    int c = 0;
+    while(file.available())
+    {
+      String str = file.readString();
+      //Требуется переписать с использованием String.
+      //Почитай https://alexgyver.ru/lessons/strings/
+      char *st = strtochar(str);
+      char *stt;
+      char **split = ft_split_c((const char *)st, '\n');
+      int len;
+      len = ft_find((const char *)split[0], "SSID: ",true);
+      if(len != -1)
+      {
+        stt = ft_cut((const char *)split[0],len);
+        ft_strcpy(ssid,(const char *)stt);
+        Serial.print("CHAR *= ");
+        Serial.println(ssid);
+      }
+      len = ft_find((const char *)split[1], "password: ",true);
+      if(len != -1)
+      {
+        stt = ft_cut((const char *)split[1],len);
+        ft_strcpy(password,(const char *)stt);
+        Serial.print("CHAR *= ");
+        Serial.println(password);
+      }
+      //освободим память, которую вызвали(нужно, ибо память не бесконачная)
+      //как раз по этой причине стоит переписать "библиотеку" работы с "строками" в динамический вид
+      free(st);
+      free(stt);
+      ft_clear(split);
+      
+      c++;
+    }
+    file.close();
+  }
+  #endif
+  /*
   EEPROM.begin(128);    //выделим память под EEPROM 
   int t;
   int start_addr = 10;
@@ -141,11 +198,14 @@ void setup(void)
     EEPROM.get(start_addr, ssid);
     EEPROM.get(sizeof(ssid) + start_addr, password);
   }
+  */
   
-  pinMode(btninput, INPUT);
-  pinMode(rele, OUTPUT);
-  digitalWrite(rele, 1);
-  
+
+  #ifdef _Button
+    pinMode(btninput, INPUT);
+    pinMode(rele, OUTPUT);
+    digitalWrite(rele, 1);
+  #endif
   #ifdef DISPLAY_ssd1306
     if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
       Serial.println(F("SSD1306 allocation failed"));
@@ -159,6 +219,9 @@ void setup(void)
   #endif
 
   setup_wifi();
+  #ifdef LAMP_MODE
+    lampinit();
+  #endif
   int c = 0;
    
   // Wait for connection
@@ -168,6 +231,9 @@ void setup(void)
     Serial.print(".");
     #ifdef _Button
       handleButton();
+    #endif
+    #ifdef LAMP_MODE
+      lamp();
     #endif
     c++;
     if(c > 20)
@@ -217,7 +283,6 @@ void setup(void)
   #ifdef TELEGRAM
     tg_init();
   #endif
-  digitalWrite(LED, statusLED);
   Serial.println("HTTP server started");
 
   
@@ -235,7 +300,9 @@ void setup(void)
   WiFi.softAP(hostssid, hostpassword,1,true,8);
   Serial.print("AP: "+(String)hostssid+"\npaswd: "+(String)hostpassword+"\n"+"\nip: ");
   Serial.println(WiFi.softAPIP());
-  
+  #ifdef LAMP_MODE
+    lampinit();
+  #endif
 }
 
 
@@ -252,6 +319,9 @@ void loop(void)
     handleButton();
   #endif
   
+  #ifdef LAMP_MODE
+    lamp();
+  #endif
   
   if (WiFi.status() == WL_CONNECTED)
   {
@@ -267,9 +337,6 @@ void loop(void)
       #ifdef DISPLAY_ssd1306
         display.display();
       #endif 
-      #ifdef LAMP_MODE
-        lamp();
-      #endif
       if(millis() - timer > 1000)
       {
         timeClient.update();

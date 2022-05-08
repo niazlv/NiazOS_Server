@@ -12,6 +12,10 @@ void setup_wifi()
   //WiFi.config(IPAddress(192, 168, 1, 73), IPAddress(192, 168, 1, 1), IPAddress(255, 255, 255, 0), IPAddress(192, 168, 1, 1));
 
   delay(10);
-  WiFi.begin((const String)ssid, (const String)password);
-  
+  #ifdef ESP8266
+    WiFi.begin((const String)ssid, (const String)password);
+  #endif
+  #ifdef ESP32
+    WiFi.begin(ssid,password);
+  #endif
 }

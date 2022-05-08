@@ -189,3 +189,8 @@ void NTPClient::setRandomPort(unsigned int minValue, unsigned int maxValue) {
   randomSeed(analogRead(0));
   this->_port = random(minValue, maxValue);
 }
+
+time_t get_unix()
+{
+  return ((time_t)timeClient.getEpochTime());
+}

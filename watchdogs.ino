@@ -25,6 +25,8 @@ void get_time()
 void watchdogs()
 {
   check_uptime();
-  unblock_button_if_dnc();
+  #ifdef _Button
+    unblock_button_if_dnc();
+  #endif
   //get_time();
 }

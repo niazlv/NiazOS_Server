@@ -1,5 +1,4 @@
 void handleRoot() {
-  digitalWrite(LED, !statusLED);
   String message = "hello from ";
   #ifdef ESP32
     message += "ESP32\n";
@@ -10,7 +9,6 @@ void handleRoot() {
   message += "\nThis port/address is needed to control one of the modules of the smart home system. If you are not familiar with it or have not been "
   "Direct instructions from the chief administrator, then I suggest you leave the page.";
   server.send(200, "text/plain", message);
-  digitalWrite(LED, statusLED);
 }
 #ifdef DISPLAY_ssd1306
 void handleDisplay()
@@ -201,7 +199,6 @@ void handleWiFi()
 }
 
 void handleNotFound() {
-  digitalWrite(LED, !statusLED);
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -214,7 +211,6 @@ void handleNotFound() {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  digitalWrite(LED, statusLED);
 }
 
 void handlers()

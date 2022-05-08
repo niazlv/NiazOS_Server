@@ -34,6 +34,7 @@ const char* serverIndex PROGMEM =
   "},"
   "success:function(d, s) {"
   "console.log('success!')"
+  
  "},"
  "error: function (a, b, c) {"
  "}"
@@ -43,9 +44,9 @@ const char* serverIndex PROGMEM =
 #endif
 void __OTA_init__()
 {
-  
-  //LittleFS.end();
-  
+  #ifdef _on_LittleFS
+    LittleFS.end();
+  #endif
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
   });
@@ -68,9 +69,9 @@ void __OTA_init__()
 #ifdef ESP32
 void webOTA_ESP32()
 {
-
-  //LittleFS.end();
-  
+  #ifdef _on_LittleFS
+    LittleFS.end();
+  #endif
   //UPDATE VIA OTA WEB INTERFASE
   server.on("/update", HTTP_GET, []() {
     server.sendHeader("Connection", "close");

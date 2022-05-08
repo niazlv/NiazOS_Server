@@ -1,5 +1,6 @@
 
 #ifdef Blink
+#define LED 2
 const String HtmlHtml PROGMEM = "<html><head><meta charset=\"utf-8\">"
 "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" /></head>";
 const String HtmlTitle PROGMEM = "<h1>Мигаем системным светодиодом из созданной точки доступа</h1><br/>\n";

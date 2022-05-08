@@ -1,34 +1,57 @@
 #ifdef LAMP_MODE
 
-#define R_pin 6
-#define G_pin 8
-#define B_pin 10
+#define R_pin 10//15//D8
+#define G_pin 13//D7
+#define B_pin 4 //D2 
 
-#define W_pin 9
-#define Y_pin 7
+#define W_pin 14  //D6
+#define Y_pin 12  //D5
 
-//doen't work!
-#define off_controler_pin 16  //0   Чтобы выключить контроллер
-#define onpins_pin 13         //1   Чтобы включить пины
+#define lampONpin 2  //D4   Чтобы включить лампу
 
-#define _50HZ_pin 14
-#define duty_pin 12
+#define _50HZ_pin 5   //D1
+
+bool blampinit = false;
+
+void lampinit()
+{
+  if(!blampinit)
+  {
+    //pinMode(R_pin,OUTPUT);
+    //pinMode(G_pin,OUTPUT);
+    //pinMode(B_pin,OUTPUT);
+    //pinMode(W_pin,OUTPUT);
+    //pinMode(Y_pin,OUTPUT);
+    pinMode(lampONpin,OUTPUT);
+    //pinMode(_50HZ_pin,OUTPUT);
+    blampinit = true;
+    Serial.println("lamp: pins inited!");
+  }
+  digitalWrite(lampONpin, 0);
+  analogWrite(W_pin, 255);
+  analogWrite(Y_pin, 0);
+  analogWrite(R_pin, 0);
+  analogWrite(G_pin, 0);
+  analogWrite(B_pin, 0);
+  digitalWrite(lampONpin, 1);
+}
 
 int timerLamp = millis();
 bool t = true;
 bool lamp_status = false;
 
+int hz = 50;
 
 void lamp()
 {
-  /*if (millis() - timerLamp >=20)
+  /*
+  if(millis() - timerLamp >= 1000/(hz*2))
   {
-    t = !t;
-    digitalWrite(_50HZ_pin, t);
+    digitalWrite(_50HZ_pin, !digitalRead(_50HZ_pin));
     timerLamp = millis();
   }
-  digitalWrite(duty_pin, HIGH);
   */
+  //lampinit();
 }
 
 void handle_lamp()
@@ -42,23 +65,46 @@ void handle_lamp()
         lamp_status = true;
       if (server.arg(i) == "0")
         lamp_status = false;
-      message = "i'm ";
-      digitalWrite(off_controler_pin, !lamp_status);
-      message += "not!";
-      message += i;
+      digitalWrite(lampONpin, server.arg(i).toInt());
+      message = "i'm okay!\n";
+      message += "settings setted: ";
+      message += lamp_status?"1":"0";
       //server.send(200, "text/plain", message);
-      //digitalWrite(onpins_pin, lamp_status);
-      message = "i'm okay!";
-      message += i;
-      server.send(200, "text/plain", message);
     }
     if (server.argName(i) == "RGB")
     {
       digitalWrite(R_pin, !digitalRead(R_pin));
     }
+    if (server.argName(i) == "W" || server.argName(i) == "Y" || server.argName(i) == "R" || server.argName(i) == "G" || server.argName(i) == "B")
+    {
+      if(0 <= server.arg(i).toInt() && server.arg(i).toInt() <= 255)
+      {
+        message += "\n"+server.argName(i);
+        message += server.arg(i);
+        if(server.argName(i) == "W")
+          analogWrite(W_pin,server.arg(i).toInt());
+        else if(server.argName(i) == "Y")
+          analogWrite(Y_pin,server.arg(i).toInt());
+        else if(server.argName(i) == "R")
+          analogWrite(R_pin,server.arg(i).toInt());
+        else if(server.argName(i) == "G")
+          analogWrite(G_pin,server.arg(i).toInt());
+        else if(server.argName(i) == "B")
+          analogWrite(B_pin,server.arg(i).toInt());
+      }
+      else
+      {
+        message = "\nwrong argument! use 0-255 numbers in argument!!";
+        //server.send(200, "text/plain", message);
+      }
+    }
+    if (server.argName(i) == "hz")
+    {
+      hz = server.arg(i).toInt();
+      server.send(200, "text/plain", "Setted");
+    }
     if (server.argName(i) == "getPins")
     {
-      //digitalWrite(onpins_pin, HIGH);
       message = "Pin status:\n";
       message += "R_pin ";
       message += digitalRead(R_pin);
@@ -80,22 +126,13 @@ void handle_lamp()
       message += digitalRead(Y_pin);
       message += "\n";
 
-      message += "off_controler_pin ";
-      message += digitalRead(off_controler_pin);
-      message += "\n";
-
-      message += "onpins_pin ";
-      message += digitalRead(onpins_pin);
+      message += "lampONpin ";
+      message += digitalRead(lampONpin);
       message += "\n";
 
       message += "_50HZ_pin ";
       message += analogRead(_50HZ_pin);
       message += "\n";
-
-      message += "duty_pin ";
-      message += analogRead(duty_pin);
-      message += "\n";
-      //digitalWrite(onpins_pin, LOW);
     }
   }
   server.send(200, "text/plain", message);
